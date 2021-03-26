@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import messagebox
 import webbrowser
 import tkinter.ttk as ttk
+import code_timer
 
 cn = mysql.connector.connect(host='localhost',
                              user='root',
@@ -441,18 +442,18 @@ win.bind('<Control-r>', Calcul)
 win.bind('<Control-q>', Clear)
 s = ttk.Style()
 menubar = tk.Menu(win)
-image  = PhotoImage(file='exit.png')
-image1 = PhotoImage(file='about.png')
-image2 = PhotoImage(file='theme.png')
-image3 = PhotoImage(file='save.png')
-image4 = PhotoImage(file='delete.png')
-image5 = PhotoImage(file='improve.png')
-image6 = PhotoImage(file='viewall.png')
-image7 = PhotoImage(file='viewone.png')
-image8 = PhotoImage(file='update.png')
-image9 = PhotoImage(file='calculate.png')
-imag10 = PhotoImage(file='color.png')
-image10= PhotoImage(file='clear.png')
+image  = PhotoImage(file='../assets/exit.png')
+image1 = PhotoImage(file='../assets/about.png')
+image2 = PhotoImage(file='../assets/theme.png')
+image3 = PhotoImage(file='../assets/save.png')
+image4 = PhotoImage(file='../assets/delete.png')
+image5 = PhotoImage(file='../assets/improve.png')
+image6 = PhotoImage(file='../assets/viewall.png')
+image7 = PhotoImage(file='../assets/viewone.png')
+image8 = PhotoImage(file='../assets/update.png')
+image9 = PhotoImage(file='../assets/calculate.png')
+imag10 = PhotoImage(file='../assets/color.png')
+image10= PhotoImage(file='../assets/clear.png')
 filemenu = tk.Menu(menubar, tearoff=0)
 menubar.add_cascade(label='File', menu=filemenu)
 edit = tk.Menu(menubar, tearoff=0)
