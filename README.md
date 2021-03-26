@@ -1,5 +1,5 @@
 # bmi
-I did BMI calculator using tkinter gui with database and some themes i hope you like it
+A BMI calculator using tkinter gui with database and some themes
 1 - themes
 2 - colors
 3 - update to db
@@ -13,6 +13,5 @@ I did BMI calculator using tkinter gui with database and some themes i hope you 
 11 - first record
 12 - bmi calculate 
 13 - menus(file , edit , help)
-14 - win binds example (calculate = ctrl + r
+14 - win binds example (calculate = ctrl + r)
 15 - icons 
-Thanks and waiting for you comment
