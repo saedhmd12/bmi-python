@@ -132,10 +132,10 @@ def Calcul(a=""):
         v3.set('')#sets nothing in the height entry string
         return
 
-    r = float(w / (h ** 2))#bmi calculation (weight /)
+    r = float(w / (h ** 2))#bmi calculation (weight / height*height)
 
-    lb11.config(text=str(round(r, 2)))
-
+    lb11.config(text=str(round(r, 2)))#gives you the result of the calculation
+    # if results
     if r < 18.5:
         lb12.config(fg='red')
         lb18.config(fg='red')
@@ -151,152 +151,152 @@ def Calcul(a=""):
 
 #view all records from database in a listbox ordereb by name and you can view or delete any record
 def VAll(a=""):
-    global ls1
-    win2 = Tk()
-    win2.geometry('720x400')
-    win2.title("View All Patient BMI")
+    global ls1# globaling the list box
+    win2 = Tk()# new window for view all
+    win2.geometry('720x400')# geomatry for view all window
+    win2.title("View All Patient BMI")# title for view all window
 
-    y = ['ID', 'Name', 'Weight', 'Height', 'Bith Date', 'BMI', 'Healthy']
-    s1 = '{:^7}{:^25}{:^8}{:^8}{:^15}{:^8}{:^8}'.format(y[0], y[1], y[2], y[3], y[4], y[5], y[6])
-    lb30 = Label(win2, text=s1, bg='lightblue', font=('courier', 10))
+    y = ['ID', 'Name', 'Weight', 'Height', 'Bith Date', 'BMI', 'Healthy']# titles for database records
+    s1 = '{:^7}{:^25}{:^8}{:^8}{:^15}{:^8}{:^8}'.format(y[0], y[1], y[2], y[3], y[4], y[5], y[6])# making spaces between fields
+    lb30 = Label(win2, text=s1, bg='lightblue', font=('courier', 10))# label for spaces for titles with background
 
-    fr1 = Frame(win2)
-    sb1 = Scrollbar(fr1)
-    ls1 = Listbox(fr1, yscrollcommand=sb1.set, font=('courier', 10), width=80, height=15)
+    fr1 = Frame(win2)#creating a frame to put the list box
+    sb1 = Scrollbar(fr1)#scroll bar for the list box to see all records
+    ls1 = Listbox(fr1, yscrollcommand=sb1.set, font=('courier', 10), width=80, height=15)#list box to put records in
 
-    sq = 'select * from BMI.Report ORDER by Name'
-    cr.execute(sq)
-    rd = cr.fetchall()
+    sq = 'select * from BMI.Report ORDER by Name'#query for selecting all(*) from table ordered by name
+    cr.execute(sq)# executes the current query
+    rd = cr.fetchall()#shows all rows of a query result set and returns a list of tuples
 
-    for row in rd:
-        w = int(row[2])
-        h = float(row[3])
-        r = float(w / (h ** 2))
+    for row in rd:# doing for loop for putting bmi result and if healthy or not without saving in into database
+        w = int(row[2])#taking the integer of weight 
+        h = float(row[3])#taking the float of height
+        r = float(w / (h ** 2))#result (bmi)
         if 18.5 <= r < 25:
-            ht = "Yes"
+            ht = "Yes"# healthy = yes
         else:
-            ht = "No"
+            ht = "No"# healthy = no
 
         s2 = '{:^7}{:^25}{:^8}{:^8}{:^15}{:^8}{:^8}'.format(row[0], row[1], row[2], row[3], str(row[4]), round(r, 2),
-                                                            ht)
-        ls1.insert(END, s2)
+                                                            ht)#formatting with spaces to print bmi result and if healthy without saving to db
+        ls1.insert(END, s2)#insert the data of the current format
 
     sb1.config(command=ls1.yview)
     lb30.place(x=30, y=30)
     fr1.place(x=30, y=60)
     ls1.pack(side=LEFT)
     sb1.pack(side=LEFT, fill=Y)
-    button = Button(win2, text='Delete it', bg = 'red', width = 20, command = delete_selected).place(x = 200, y = 350)
-    button1 = Button(win2, text = 'View it',bg = 'green', width = 20,command = view_selected).place(x = 400 , y = 350)
+    button = Button(win2, text='Delete it', bg = 'red', width = 20, command = delete_selected).place(x = 200, y = 350)#delete any selected record
+    button1 = Button(win2, text = 'View it',bg = 'green', width = 20,command = view_selected).place(x = 400 , y = 350)#view any selected record
 
     win2.mainloop()
 
 #get's the name you entered and printing the data on the fields place by place if record exists and checks if exist
 def VOne(a=""):
-    Clear_Lb()
-    if e1.get() == "":
-        showinfo("VOne", "please enter name")
-    else:
-        sq = 'select * from BMI.Report where Name = %s'
-        cr.execute(sq, (e1.get(),))
-        rd = cr.fetchall()
+    Clear_Lb()#runs the clear_lb function which configure the category labels lightblue to be unshown 
+    if e1.get() == "":#if name entry is empty
+        showinfo("VOne", "please enter name")# shows message box
+    else:#if it is not empty then ...
+        sq = 'select * from BMI.Report where Name = %s'# query to view(select) all entered data (refer to name entered)
+        cr.execute(sq, (e1.get(),))# executes the current query and getting the name entry 
+        rd = cr.fetchall()# shows all rows of a query result set and returns a list of tuples
         for row in rd:
             for j in range(len(row)):
-                v2.set(row[2])
-                v3.set(row[3])
-                e4.set_date(row[4])
-        Calcul()
+                v2.set(row[2])# sets height record in the height entry
+                v3.set(row[3])# sets weight record in the weight entry
+                e4.set_date(row[4])# sets date record in the date entry
+        Calcul()# calculates the current data entered
 
 #get's the name you entered and delete it if exists
 def Delete(a=""):
-    if e1.get() == "":
-        showinfo("Delete", "Please enter the Name")
-    else:
+    if e1.get() == "":#checks if name is empty
+        showinfo("Delete", "Please enter the Name")# shows message box
+    else:# if name isn't empty
         try:
-            sq = 'select * from BMI.Report where Name = %s'
-            cr.execute(sq, (e1.get(),))
-            nam = (cr.fetchone()[1])
-            if e1.get() == nam:
-                sq = 'Delete from BMI.Report where Name = %s'
-                cr.execute(sq, (e1.get(),))
-                cn.commit()
-                showinfo("Delete", "One Record Removed")
-                Clear()
-        except:
-            showinfo("Delete", "Name not found")
-            v1.set('')
-            e1.focus()
+            sq = 'select * from BMI.Report where Name = %s'#selects all data in the table where name equal name entry
+            cr.execute(sq, (e1.get(),))# executes the current query and getting the value of name entry
+            nam = (cr.fetchone()[1])#retrieves the next row of a query result set and returns a single sequence
+            if e1.get() == nam:# if name exists in the database then...
+                sq = 'Delete from BMI.Report where Name = %s'# deletes the record from database where name = value of name entry
+                cr.execute(sq, (e1.get(),))# executes the current query and get's the value of name entry
+                cn.commit()#makes changes in the database
+                showinfo("Delete", "One Record Removed")#shows message box
+                Clear()#clears all fields
+        except:#if name doesn't exists
+            showinfo("Delete", "Name not found")# shows message box
+            v1.set('')#sets name empty
+            e1.focus()# put the mouse in the name entry
 
 #prints first record place by place
 def Frst():
     global Indextabl
     try:
-        cr.execute("SELECT * FROM BMI.Report ORDER BY id_inc limit 1 ")
+        cr.execute("SELECT * FROM BMI.Report ORDER BY id_inc limit 1 ")#query to select 1 record oredered bi id
         for rec in cr:
             for j in range(len(rec)):
-                v1.set(rec[1])
-                v2.set(rec[2])
-                v3.set(rec[3])
+                v1.set(rec[1])#sets name in the name entry
+                v2.set(rec[2])#sets weight in the weight entry
+                v3.set(rec[3])#sets height in the height entry
                 e4.set_date(rec[4])
-                btP['state'] = "disabled"
-                btN['state'] = "normal"
+                btP['state'] = "disabled"#if no more records disable the button
+                btN['state'] = "normal"# normal button will be stated if there is records
                 Indextabl = 1
-                ctr = str(Indextabl) + '/' + str(len(tbl) - 1)
+                ctr = str(Indextabl) + '/' + str(len(tbl) - 1)#for pagination
                 lb20.config(text=ctr)
-        Calcul()
+        Calcul()#calculates the current data on the height and weight fields
     except:
-        showinfo("First", " No records was found ")
+        showinfo("First", " No records was found ")#shows messagebox
 
 #prints last record place by place
 def Lst():
     global Indextabl
     try:
-        cr.execute("SELECT * FROM BMI.Report ORDER BY id_inc DESC LIMIT 1 ")
+        cr.execute("SELECT * FROM BMI.Report ORDER BY id_inc DESC LIMIT 1 ")#query to select last record ordered by id
         for rec in cr:
             for j in range(len(rec)):
-                v1.set(rec[1])
-                v2.set(rec[2])
-                v3.set(rec[3])
-                e4.set_date(rec[4])
-                btN['state'] = "disabled"
-                btP['state'] = "normal"
+                v1.set(rec[1])#sets name in the name entry
+                v2.set(rec[2])#sets weight in the weight entry
+                v3.set(rec[3])#sets height in the height entry
+                e4.set_date(rec[4])#sets date in the date entry
+                btN['state'] = "disabled"#if no records disable the button
+                btP['state'] = "normal"# normal button will be stated if there is records
                 Indextabl = len(tbl) - 1
-                ctr = str(Indextabl) + '/' + str(len(tbl) - 1)
+                ctr = str(Indextabl) + '/' + str(len(tbl) - 1)#for counting (pagination)
                 lb20.config(text=ctr)
-        Calcul()
+        Calcul()#calculates the current data on the height and weight fields
     except:
-        showwarning("Last", " No records was found ")
+        showwarning("Last", " No records was found ")# shows message
 
 #prints any record record place by place
 def Prntdata(r):
-    v1.set(r[1])
-    v2.set(r[2])
-    v3.set(r[3])
-    e4.set_date(r[4])
-    Calcul()
-    print(Indextabl)
+    v1.set(r[1])#sets data to name entry 
+    v2.set(r[2])#sets data to weight entry
+    v3.set(r[3])#sets data to height entry
+    e4.set_date(r[4])#sets date to date time entry
+    Calcul()#calculates the current height and weight
+    print(Indextabl)#prints number of record in the table
 
 #gives you all records ordered by the id(+1)
 def Nxt():
-    sqs = "SELECT * FROM BMI.Report order by id_inc"
-    cr.execute(sqs)
-    tbl = cr.fetchall()
+    sqs = "SELECT * FROM BMI.Report order by id_inc"#selects all records from db table ordered by id
+    cr.execute(sqs)#executes the current query
+    tbl = cr.fetchall()#prints all rows of a query result set and returns a list of tuples
 
     global Indextabl
     if Indextabl < len(tbl) - 1:
         Indextabl += 1
-    btP['state'] = "normal"
+    btP['state'] = "normal"#if there is data set button normal
     if Indextabl == len(tbl) - 1:
-        btN['state'] = "disabled"
-    Prntdata(tbl[Indextabl - 1])
-    ctr = str(Indextabl) + '/' + str(len(tbl) - 1)
+        btN['state'] = "disabled"# the no more data set button disabled
+    Prntdata(tbl[Indextabl - 1])#prints the current data in fields
+    ctr = str(Indextabl) + '/' + str(len(tbl) - 1)#shows pagination
     lb20.config(text=ctr)
 
 #gives you all records ordered by id(-1)
 def Prvs():
-    sqs = "SELECT * FROM BMI.Report order by id_inc"
-    cr.execute(sqs)
-    tbl = cr.fetchall()
+    sqs = "SELECT * FROM BMI.Report order by id_inc"#selects all records from db table ordered by id
+    cr.execute(sqs)#executes the current query
+    tbl = cr.fetchall()#prints all rows of a query result set and returns a list of tuples
 
     global Indextabl
     if Indextabl > 0:
@@ -305,7 +305,7 @@ def Prvs():
         ctr = str(Indextabl) + '/' + str(len(tbl) - 1)
         lb20.config(text=ctr)
     if Indextabl <= 1:
-        btP['state'] = 'disabled'
+        btP['state'] = 'disabled'# the no more data set button disabled
     if btN['state'] == 'disabled':
         btN['state'] = 'normal'
 #help menu
@@ -391,17 +391,17 @@ def about():
     messagebox.showinfo("About Bmi","Body mass index (BMI) is a measure of body fat based on height and weight that applies to adult men and women")
 #it searches if there is a record(refer to the name entered)
 def search_table(x):
-    cr.execute('SELECT * FROM BMI.report')
-    table = cr.fetchall()
-    results = tuple(row for row in table if row[1].startswith(x))
+    cr.execute('SELECT * FROM BMI.report')#selects all (*) record in the database
+    table = cr.fetchall()#shows all rows in the db table and returns a list of tuple
+    results = tuple(row for row in table if row[1].startswith(x))#The startswith() method returns True if the string starts with the specified value, otherwise False
     return results
 ##refer to search_table + design and showing records
 def search():
     search_win = Tk()
     search_win.title("Result for your search")
     search_win.geometry('800x300')
-    y = ['ID', 'Name', 'Weight', 'Height', 'Bith Date', 'BMI', 'Healthy']
-    s1 = '{:^7}{:^25}{:^8}{:^8}{:^15}{:^8}{:^8}'.format(y[0], y[1], y[2], y[3], y[4], y[5], y[6])
+    y = ['ID', 'Name', 'Weight', 'Height', 'Bith Date', 'BMI', 'Healthy']#title for the records
+    s1 = '{:^7}{:^25}{:^8}{:^8}{:^15}{:^8}{:^8}'.format(y[0], y[1], y[2], y[3], y[4], y[5], y[6])#sets spaces between each field
     lb30 = Label(search_win, text=s1, bg='lightblue', font=('courier', 10))
     fr1 = Frame(search_win)
     sb1 = Scrollbar(fr1)
@@ -528,15 +528,15 @@ lb10 = Label(win, text='Your BMI is:')#your bmi is label
 lb11 = Label(win, text='      ', bg='white', relief=SUNKEN, font=('Arial', 10))
 fr1 =  LabelFrame(win, text='Your Category is', padx=20, pady=20)# category label frame
 # category results
-lb12 = Label(fr1, fg='lightgray', text='You Are UnderWeight')
-lb13 = Label(fr1, fg='lightgray', text='You Are Normal')
-lb14 = Label(fr1, fg='lightgray', text='You Are Over Weight')
-lb15 = Label(fr1, fg='lightgray', text='You Are Obese')
-lb16 = Label(win, text='Healthy ? ')
-lb17 = Label(win, fg='lightgray', text='Yes')
-lb18 = Label(win, fg='lightgray', text='No')
-ctr =  str(Indextabl) + '/' + str(len(tbl) - 1)
-lb20 = Label(win, text=ctr, bg='white', width=4, justify='center')
+lb12 = Label(fr1, fg='lightgray', text='You Are UnderWeight')#under weight category label
+lb13 = Label(fr1, fg='lightgray', text='You Are Normal')#normal category label
+lb14 = Label(fr1, fg='lightgray', text='You Are Over Weight')#over weight category label
+lb15 = Label(fr1, fg='lightgray', text='You Are Obese')#obese category label
+lb16 = Label(win, text='Healthy ? ')#healthy label
+lb17 = Label(win, fg='lightgray', text='Yes')#yes label
+lb18 = Label(win, fg='lightgray', text='No')#no label
+ctr =  str(Indextabl) + '/' + str(len(tbl) - 1)#pagination
+lb20 = Label(win, text=ctr, bg='white', width=4, justify='center')#label for pagination
 labels = [lb1,lb2,lb3,lb4,lb5,lb10,lb11,lb16,lb20,fr1]#for looping colors for labels
 buttons = [bt1,bt2,bt3,bt4,bt5,bt6,bt7,bt8,bt9,btN,btP]#for looping colors for buttont
 labels2 = [lb12,lb13,lb14,lb15,lb17,lb18]#for looping colors for labels(results)
