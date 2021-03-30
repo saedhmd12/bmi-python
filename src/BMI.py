@@ -1,6 +1,6 @@
 from tkinter.messagebox import *
 from tkcalendar import *
-import mysql.connector
+import sqlite3
 from datetime import *
 from tkinter import *
 import tkinter as tk
@@ -8,28 +8,37 @@ from tkinter import messagebox
 import webbrowser
 import tkinter.ttk as ttk
 # create connection to BMI database
-cn = mysql.connector.connect(host='localhost',
-                             user='root',
-                             password='',
-                             database="BMI")
+cn = sqlite3.connect("bmil")
 cr = cn.cursor()
 # if there is no database here we created it
-cr.execute("create database if not exists BMI")
-# creating table in the bmi database (report)
-cr.execute('''create table if not exists Report (
-                        Id_Inc int auto_increment, 
-                        Name varchar(25) not null,
-                        Weight int,
-                        Height float,
-                        B_Date date,
-                        primary key(Id_Inc))''')
+
+try:
+    cr.execute(
+        """CREATE TABLE report(id_inc INTEGER PRIMARY KEY, Name TEXT (25),
+                   Weight INTEGER, 
+                   Height REAL,
+                   B_Date TEXT);"""
+    )
+    ID = 0
+except:
+    print("Table Already Exists")
 
 
 Indextabl = 0
-sqs = "SELECT * FROM BMI.Report order by id_inc"#query to select (all(*)) from db table ordered by id
+sqs = "SELECT * FROM report order by id_inc"#query to select (all(*)) from db table ordered by id
 cr.execute(sqs)#executes the sqs to run the query
 tbl = cr.fetchall()#fetchall is a query result set and returns a list of tuples
 
+
+def table():
+    cr.execute("select * from report")
+    return cr.fetchall()
+
+
+if len(table()) == 0:
+    ID = 0
+else:
+    ID = table()[-1][0] + 1
 #def exit for window protocol and for exit menu
 def Exit():
     cr.close()# close the cursor
@@ -81,11 +90,13 @@ def Save(a=""):
     Calcul()# calculates the gives height and weight
     quest = messagebox.askyesno("Save", "Do you want to save data ?")# asks yes or no if you really want to save
     if quest == True:# if quest = yes then ...
-        sq = '''insert into BMI.Report (Name, Weight, Height, B_Date) 
-               values(%s, %s, %s, %s) '''# inserts all fields with the result in the database
-        x = (e1.get(), e2.get(), e3.get(), d2)# gets the name,weight,height,dateentry entries
-        cr.execute(sq, x)#exucuting the sq query to insert the data of x
-        cn.commit()#to make sence and insert(makes the changes)
+        global ID
+        sql = "INSERT INTO report(id_inc,Name,Weight,Height,B_Date) VALUES (%d, '%s', %s, %s, '%s');"
+        x = (ID,e1.get(), e2.get(), e3.get(), d2)# gets the name,weight,height,dateentry entries
+        cr.execute(sql % x)
+        cn.commit()
+        ID += 1
+        
     Clear()#clears all fields 
 
 #updates any record in database (getting it through name while clicking to view one and you can update the name)
@@ -107,7 +118,7 @@ def Update(a=""):
     Calcul()#calculates the current entered data of weight and height
     quest = messagebox.askyesno("Update", "Sure to update data ?")# asks yes or no if you really want to update
     if quest == True:# if quest = yes then...
-        sq = 'update BMI.Report set Weight=%s, Height=%s, B_Date=%s where Name=%s'# updates the current data entered where name = name entered
+        sq = 'update report set Weight=%s, Height=%s, B_Date=%s where Name=%s'# updates the current data entered where name = name entered
         x = (e2.get(), e3.get(), d2, e1.get())# gets weight,height,dateentry and name entry
         cr.execute(sq, x)# execute the sq query and the x variable
         cn.commit()# make changes in the database
@@ -164,7 +175,7 @@ def VAll(a=""):
     sb1 = Scrollbar(fr1)#scroll bar for the list box to see all records
     ls1 = Listbox(fr1, yscrollcommand=sb1.set, font=('courier', 10), width=80, height=15)#list box to put records in
 
-    sq = 'select * from BMI.Report ORDER by Name'#query for selecting all(*) from table ordered by name
+    sq = 'select * from report ORDER by Name'#query for selecting all(*) from table ordered by name
     cr.execute(sq)# executes the current query
     rd = cr.fetchall()#shows all rows of a query result set and returns a list of tuples
 
@@ -197,14 +208,14 @@ def VOne(a=""):
     if e1.get() == "":#if name entry is empty
         showinfo("VOne", "please enter name")# shows message box
     else:#if it is not empty then ...
-        sq = 'select * from BMI.Report where Name = %s'# query to view(select) all entered data (refer to name entered)
-        cr.execute(sq, (e1.get(),))# executes the current query and getting the name entry 
+        sq = "Select * from report where Name = '%s';"# query to view(select) all entered data (refer to name entered)
+        cr.execute(sq % e1.get())# executes the current query and getting the name entry 
         rd = cr.fetchall()# shows all rows of a query result set and returns a list of tuples
         for row in rd:
             for j in range(len(row)):
                 v2.set(row[2])# sets height record in the height entry
                 v3.set(row[3])# sets weight record in the weight entry
-                e4.set_date(row[4])# sets date record in the date entry
+                e4.set_date(datetime.strptime(row[4], "%d/%m/%y"))# sets date record in the date entry
         Calcul()# calculates the current data entered
 
 #get's the name you entered and delete it if exists
@@ -213,12 +224,12 @@ def Delete(a=""):
         showinfo("Delete", "Please enter the Name")# shows message box
     else:# if name isn't empty
         try:
-            sq = 'select * from BMI.Report where Name = %s'#selects all data in the table where name equal name entry
-            cr.execute(sq, (e1.get(),))# executes the current query and getting the value of name entry
+            sq = "Select * from report where Name = '%s';" #selects all data in the table where name equal name entry
+            cr.execute(sq % e1.get() )# executes the current query and getting the value of name entry
             nam = (cr.fetchone()[1])#retrieves the next row of a query result set and returns a single sequence
             if e1.get() == nam:# if name exists in the database then...
-                sq = 'Delete from BMI.Report where Name = %s'# deletes the record from database where name = value of name entry
-                cr.execute(sq, (e1.get(),))# executes the current query and get's the value of name entry
+                sq = "Delete from report where Name = '%s'"# deletes the record from database where name = value of name entry
+                cr.execute(sq % e1.get())# executes the current query and get's the value of name entry
                 cn.commit()#makes changes in the database
                 showinfo("Delete", "One Record Removed")#shows message box
                 Clear()#clears all fields
@@ -231,13 +242,13 @@ def Delete(a=""):
 def Frst():
     global Indextabl
     try:
-        cr.execute("SELECT * FROM BMI.Report ORDER BY id_inc limit 1 ")#query to select 1 record oredered bi id
+        cr.execute("SELECT * FROM report ORDER BY id_inc limit 1 ")#query to select 1 record oredered bi id
         for rec in cr:
             for j in range(len(rec)):
                 v1.set(rec[1])#sets name in the name entry
                 v2.set(rec[2])#sets weight in the weight entry
                 v3.set(rec[3])#sets height in the height entry
-                e4.set_date(rec[4])
+                e4.set_date(datetime.strptime(row[4], "%d/%m/%y"))
                 btP['state'] = "disabled"#if no more records disable the button
                 btN['state'] = "normal"# normal button will be stated if there is records
                 Indextabl = 1
@@ -251,7 +262,7 @@ def Frst():
 def Lst():
     global Indextabl
     try:
-        cr.execute("SELECT * FROM BMI.Report ORDER BY id_inc DESC LIMIT 1 ")#query to select last record ordered by id
+        cr.execute("SELECT * FROM report ORDER BY id_inc DESC LIMIT 1 ")#query to select last record ordered by id
         for rec in cr:
             for j in range(len(rec)):
                 v1.set(rec[1])#sets name in the name entry
@@ -272,13 +283,13 @@ def Prntdata(r):
     v1.set(r[1])#sets data to name entry 
     v2.set(r[2])#sets data to weight entry
     v3.set(r[3])#sets data to height entry
-    e4.set_date(r[4])#sets date to date time entry
+    e4.set_date(datetime.strptime(row[4], "%d/%m/%y"))#sets date to date time entry
     Calcul()#calculates the current height and weight
     print(Indextabl)#prints number of record in the table
 
 #gives you all records ordered by the id(+1)
 def Nxt():
-    sqs = "SELECT * FROM BMI.Report order by id_inc"#selects all records from db table ordered by id
+    sqs = "SELECT * FROM report order by id_inc"#selects all records from db table ordered by id
     cr.execute(sqs)#executes the current query
     tbl = cr.fetchall()#prints all rows of a query result set and returns a list of tuples
 
@@ -294,7 +305,7 @@ def Nxt():
 
 #gives you all records ordered by id(-1)
 def Prvs():
-    sqs = "SELECT * FROM BMI.Report order by id_inc"#selects all records from db table ordered by id
+    sqs = "SELECT * FROM report order by id_inc"#selects all records from db table ordered by id
     cr.execute(sqs)#executes the current query
     tbl = cr.fetchall()#prints all rows of a query result set and returns a list of tuples
 
@@ -328,7 +339,7 @@ def click_me(url):
 #deletes any record selected in the view all window list
 def delete_selected():
     id = ls1.get(ANCHOR)[:7].strip()
-    cr.execute('delete from BMI.report where id_inc=%s'%id)
+    cr.execute('delete from report where id_inc=%s'%id)
     ls1.delete(ANCHOR)
 
 #view any record selected in the view all window list
@@ -391,10 +402,9 @@ def about():
     messagebox.showinfo("About Bmi","Body mass index (BMI) is a measure of body fat based on height and weight that applies to adult men and women")
 #it searches if there is a record(refer to the name entered)
 def search_table(x):
-    cr.execute('SELECT * FROM BMI.report')#selects all (*) record in the database
-    table = cr.fetchall()#shows all rows in the db table and returns a list of tuple
-    results = tuple(row for row in table if row[1].startswith(x))#The startswith() method returns True if the string starts with the specified value, otherwise False
-    return results
+    cr.execute("SELECT * FROM report where Name like '%s%%'" %x) 
+    table = cr.fetchall() # shows all rows in the db table and returns a list of tuple
+    return table
 ##refer to search_table + design and showing records
 def search():
     search_win = Tk()
