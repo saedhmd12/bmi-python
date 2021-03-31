@@ -7,7 +7,7 @@ from tkcalendar import *
 import sqlite3
 
 # create connection to BMI database
-cn = sqlite3.connect("bmil")
+cn = sqlite3.connect("../bmil.db")
 cr = cn.cursor()
 # if there is no database here we created it
 
