@@ -110,7 +110,7 @@ def Save(a=""):
             e1.get(),
             e2.get(),
             e3.get(),
-            d2,
+            e4.get(),
         )  # gets the name,weight,height,dateentry entries
         cr.execute(sql % x)
         cn.commit()
@@ -252,7 +252,7 @@ def VAll(rd: list = []):
             win2, text="Delete it", bg="red", width=20, command=delete_selected
         ).place(x=200, y=350)
         # delete any selected record
-    
+
     else:
         button = Button(
             win2, text="Delete it", bg="red", width=20, command=delete_selected
@@ -301,7 +301,7 @@ def VOne(a=""):
                 v2.set(row[2])  # sets height record in the height entry
                 v3.set(row[3])  # sets weight record in the weight entry
                 e4.set_date(
-                    datetime.strptime(row[4], "%Y-%m-%d %H:%M:%S")
+                    datetime.strptime(row[4], "%d/%m%Y")
                 )  # sets date record in the date entry
         Calcul()  # calculates the current data entered
 
@@ -316,11 +316,14 @@ def Delete(a=""):
             cr.execute(sq % e1.get())
             # executes the current query and getting the value of name entry
 
-            VAll(cr.fetchall())
+            records = cr.fetchall()
+            if not records:
+                raise ValueError("Name not found")
+            Clear()
+            VAll(records)
 
-        except:  # if name doesn't exists
-            messagebox.showinfo("Delete", "Name not found")  # shows message box
-            v1.set("")  # sets name empty
+        except ValueError as err:  # if name doesn't exists
+            messagebox.showinfo("Delete", err)  # shows message box
             e1.focus()  # put the mouse in the name entry
 
 
@@ -331,22 +334,20 @@ def Frst():
         cr.execute(
             "SELECT * FROM report ORDER BY id_inc limit 1 "
         )  # query to select 1 record oredered bi id
-        for rec in cr:
-            for j in range(len(rec)):
-                v1.set(rec[1])  # sets name in the name entry
-                v2.set(rec[2])  # sets weight in the weight entry
-                v3.set(rec[3])  # sets height in the height entry
-                e4.set_date(datetime.strptime(rec[4], "%d/%m/%y"))
-                btP["state"] = "disabled"  # if no more records disable the button
-                btN[
-                    "state"
-                ] = "normal"  # normal button will be stated if there is records
-                Indextabl = 1
-                ctr = str(Indextabl) + "/" + str(len(tbl) - 1)  # for pagination
-                lb20.config(text=ctr)
+        rec = cr.fetchone()
+        assert rec, ValueError("No records found")
+        v1.set(rec[1])  # sets name in the name entry
+        v2.set(rec[2])  # sets weight in the weight entry
+        v3.set(rec[3])  # sets height in the height entry
+        e4.set_date(datetime.strptime(rec[4], "%d/%m/%Y"))
+        btP["state"] = "disabled"  # if no prev records disable the button
+        btN["state"] = "normal"  # normal button will be stated if there is records
+        Indextabl = 1
+        ctr = str(Indextabl) + "/" + str(len(tbl) - 1)  # for pagination
+        lb20.config(text=ctr)
         Calcul()  # calculates the current data on the height and weight fields
-    except:
-        messagebox.showinfo("First", " No records was found ")  # shows messagebox
+    except ValueError as err:
+        messagebox.showerror("First", err)  # shows messagebox
 
 
 # prints last record place by place
@@ -382,7 +383,7 @@ def Prntdata(r):
     v2.set(r[2])  # sets data to weight entry
     v3.set(r[3])  # sets data to height entry
     e4.set_date(
-        datetime.strptime(r[4], "%Y-%m-%d %H:%M:%S")
+        datetime.strptime(r[4], "%d/%m/%Y")
     )  # sets date to date time entry
     Calcul()  # calculates the current height and weight
     print(Indextabl)  # prints number of record in the table
@@ -469,6 +470,8 @@ def delete_selected():
     cr.execute("delete from report where id_inc=%s" % id)
     cn.commit()
     ls1.delete(ANCHOR)
+    messagebox.showinfo("Delete", "One Record Removed")  # shows message box
+    return 
 
 
 # view any record selected in the view all window list
