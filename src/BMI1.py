@@ -203,7 +203,7 @@ def Calcul(a=""):
 
 
 # view all records from database in a listbox ordereb by name and you can view or delete any record
-def VAll(a=""):
+def VAll(rd: list = []):
     global ls1  # globaling the list box
     win2 = Tk()  # new window for view all
     win2.geometry("720x400")  # geomatry for view all window
@@ -231,10 +231,33 @@ def VAll(a=""):
         fr1, yscrollcommand=sb1.set, font=("courier", 10), width=80, height=15
     )  # list box to put records in
 
-    sq = "select * from report ORDER by Name"  # query for selecting all(*) from table ordered by name
-    cr.execute(sq)  # executes the current query
-    rd = cr.fetchall()
-    # shows all rows of a query result set and returns a list of tuples
+    if not rd:
+        sq = "select * from report ORDER by Name"
+
+        # query for selecting all(*) from table ordered by name
+        cr.execute(sq)  # executes the current query
+        rd = cr.fetchall()
+        # shows all rows of a query result set and returns a list of tuples
+
+        button1 = Button(
+            win2,
+            text="View it",
+            bg="green",
+            width=20,
+            command=lambda: view_selected(win2),
+        ).place(x=400, y=350)
+        # view any selected record
+
+        button = Button(
+            win2, text="Delete it", bg="red", width=20, command=delete_selected
+        ).place(x=200, y=350)
+        # delete any selected record
+    
+    else:
+        button = Button(
+            win2, text="Delete it", bg="red", width=20, command=delete_selected
+        ).place(x=300, y=350)
+        # delete any selected record
 
     for row in rd:
         # doing for loop for putting bmi result and if healthy or not without saving in into database
@@ -256,14 +279,6 @@ def VAll(a=""):
     fr1.place(x=30, y=60)
     ls1.pack(side=LEFT)
     sb1.pack(side=LEFT, fill=Y)
-    button = Button(
-        win2, text="Delete it", bg="red", width=20, command=delete_selected
-    ).place(x=200, y=350)
-    # delete any selected record
-    button1 = Button(
-        win2, text="View it", bg="green", width=20, command=lambda: view_selected(win2)
-    ).place(x=400, y=350)
-    # view any selected record
 
     win2.mainloop()
 
@@ -300,17 +315,9 @@ def Delete(a=""):
             sq = "Select * from report where Name = '%s';"  # selects all data in the table where name equal name entry
             cr.execute(sq % e1.get())
             # executes the current query and getting the value of name entry
-            nam = cr.fetchone()[
-                1
-            ]  # retrieves the next row of a query result set and returns a single sequence
-            if e1.get() == nam:  # if name exists in the database then...
-                sq = "Delete from report where Name = '%s'"  # deletes the record from database where name = value of name entry
-                cr.execute(
-                    sq % e1.get()
-                )  # executes the current query and get's the value of name entry
-                cn.commit()  # makes changes in the database
-                messagebox.showinfo("Delete", "One Record Removed")  # shows message box
-                Clear()  # clears all fields
+
+            VAll(cr.fetchall())
+
         except:  # if name doesn't exists
             messagebox.showinfo("Delete", "Name not found")  # shows message box
             v1.set("")  # sets name empty
