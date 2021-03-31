@@ -8,7 +8,7 @@ from tkcalendar import *
 import sqlite3
 
 # create connection to BMI database
-cn = sqlite3.connect("bmil")
+cn = sqlite3.connect("bmil.db")
 cr = cn.cursor()
 # if there is no database here we created it
 
@@ -21,11 +21,15 @@ try:
             B_Date TEXT);"""
     )
     ID = 0
+
+    Indextabl = 0
+
 except:
     print("Table Already Exists")
 
+    Indextabl = 1
 
-Indextabl = 0
+
 sqs = "SELECT * FROM report order by id_inc"  # query to select (all(*)) from db table ordered by id
 cr.execute(sqs)  # executes the sqs to run the query
 tbl = cr.fetchall()  # fetchall is a query result set and returns a list of tuples
@@ -335,7 +339,7 @@ def Frst():
             "SELECT * FROM report ORDER BY id_inc limit 1 "
         )  # query to select 1 record oredered bi id
         rec = cr.fetchone()
-        assert rec, ValueError("No records found")
+        assert rec, "No records found"
         v1.set(rec[1])  # sets name in the name entry
         v2.set(rec[2])  # sets weight in the weight entry
         v3.set(rec[3])  # sets height in the height entry
@@ -343,10 +347,10 @@ def Frst():
         btP["state"] = "disabled"  # if no prev records disable the button
         btN["state"] = "normal"  # normal button will be stated if there is records
         Indextabl = 1
-        ctr = str(Indextabl) + "/" + str(len(tbl) - 1)  # for pagination
+        ctr = str(Indextabl) + "/" + str(len(tbl))  # for pagination
         lb20.config(text=ctr)
         Calcul()  # calculates the current data on the height and weight fields
-    except ValueError as err:
+    except AssertionError as err:
         messagebox.showerror("First", err)  # shows messagebox
 
 
@@ -367,9 +371,9 @@ def Lst():
                 btP[
                     "state"
                 ] = "normal"  # normal button will be stated if there is records
-                Indextabl = len(tbl) - 1
+                Indextabl = len(tbl)
                 ctr = (
-                    str(Indextabl) + "/" + str(len(tbl) - 1)
+                    str(Indextabl) + "/" + str(len(tbl))
                 )  # for counting (pagination)
                 lb20.config(text=ctr)
         Calcul()  # calculates the current data on the height and weight fields
@@ -398,13 +402,13 @@ def Nxt():
     )  # prints all rows of a query result set and returns a list of tuples
 
     global Indextabl
-    if Indextabl < len(tbl) - 1:
+    if Indextabl < len(tbl):
         Indextabl += 1
     btP["state"] = "normal"  # if there is data set button normal
-    if Indextabl == len(tbl) - 1:
+    if Indextabl == len(tbl):
         btN["state"] = "disabled"  # the no more data set button disabled
     Prntdata(tbl[Indextabl - 1])  # prints the current data in fields
-    ctr = str(Indextabl) + "/" + str(len(tbl) - 1)  # shows pagination
+    ctr = str(Indextabl) + "/" + str(len(tbl))  # shows pagination
     lb20.config(text=ctr)
 
 
@@ -419,13 +423,13 @@ def Prvs():
     global Indextabl
     if Indextabl > 0:
         Indextabl -= 1
-        Prntdata(tbl[Indextabl])
-        ctr = str(Indextabl) + "/" + str(len(tbl) - 1)
-        lb20.config(text=ctr)
     if Indextabl <= 1:
         btP["state"] = "disabled"  # the no more data set button disabled
     if btN["state"] == "disabled":
         btN["state"] = "normal"
+    Prntdata(tbl[Indextabl-1])
+    ctr = str(Indextabl) + "/" + str(len(tbl))
+    lb20.config(text=ctr)
 
 
 # help menu
