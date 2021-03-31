@@ -109,7 +109,7 @@ def Save(a=""):
             e1.get(),
             e2.get(),
             e3.get(),
-            d2,
+            e4.get(),
         )  # gets the name,weight,height,dateentry entries
         cr.execute(sql % x)
         cn.commit()
@@ -202,7 +202,7 @@ def Calcul(a=""):
 
 
 # view all records from database in a listbox ordereb by name and you can view or delete any record
-def VAll(a=""):
+def VAll(rd: list = []):
     global ls1  # globaling the list box
     win2 = Tk()  # new window for view all
     win2.geometry("720x400")  # geomatry for view all window
@@ -230,10 +230,33 @@ def VAll(a=""):
         fr1, yscrollcommand=sb1.set, font=("courier", 10), width=80, height=15
     )  # list box to put records in
 
-    sq = "select * from report ORDER by Name"  # query for selecting all(*) from table ordered by name
-    cr.execute(sq)  # executes the current query
-    rd = cr.fetchall()
-    # shows all rows of a query result set and returns a list of tuples
+    if not rd:
+        sq = "select * from report ORDER by Name"
+
+        # query for selecting all(*) from table ordered by name
+        cr.execute(sq)  # executes the current query
+        rd = cr.fetchall()
+        # shows all rows of a query result set and returns a list of tuples
+
+        button1 = Button(
+            win2,
+            text="View it",
+            bg="green",
+            width=20,
+            command=lambda: view_selected(win2),
+        ).place(x=400, y=350)
+        # view any selected record
+
+        button = Button(
+            win2, text="Delete it", bg="red", width=20, command=delete_selected
+        ).place(x=200, y=350)
+        # delete any selected record
+
+    else:
+        button = Button(
+            win2, text="Delete it", bg="red", width=20, command=delete_selected
+        ).place(x=300, y=350)
+        # delete any selected record
 
     for row in rd:
         # doing for loop for putting bmi result and if healthy or not without saving in into database
@@ -255,14 +278,6 @@ def VAll(a=""):
     fr1.place(x=30, y=60)
     ls1.pack(side=LEFT)
     sb1.pack(side=LEFT, fill=Y)
-    button = Button(
-        win2, text="Delete it", bg="red", width=20, command=delete_selected
-    ).place(x=200, y=350)
-    # delete any selected record
-    button1 = Button(
-        win2, text="View it", bg="green", width=20, command=lambda: view_selected(win2)
-    ).place(x=400, y=350)
-    # view any selected record
 
     win2.mainloop()
 
@@ -285,7 +300,7 @@ def VOne(a=""):
                 v2.set(row[2])  # sets height record in the height entry
                 v3.set(row[3])  # sets weight record in the weight entry
                 e4.set_date(
-                    datetime.strptime(row[4], "%Y-%m-%d %H:%M:%S")
+                    datetime.strptime(row[4], "%d/%m%Y")
                 )  # sets date record in the date entry
         Calcul()  # calculates the current data entered
 
@@ -299,20 +314,15 @@ def Delete(a=""):
             sq = "Select * from report where Name = '%s';"  # selects all data in the table where name equal name entry
             cr.execute(sq % e1.get())
             # executes the current query and getting the value of name entry
-            nam = cr.fetchone()[
-                1
-            ]  # retrieves the next row of a query result set and returns a single sequence
-            if e1.get() == nam:  # if name exists in the database then...
-                sq = "Delete from report where Name = '%s'"  # deletes the record from database where name = value of name entry
-                cr.execute(
-                    sq % e1.get()
-                )  # executes the current query and get's the value of name entry
-                cn.commit()  # makes changes in the database
-                messagebox.showinfo("Delete", "One Record Removed")  # shows message box
-                Clear()  # clears all fields
-        except:  # if name doesn't exists
-            messagebox.showinfo("Delete", "Name not found")  # shows message box
-            v1.set("")  # sets name empty
+
+            records = cr.fetchall()
+            if not records:
+                raise ValueError("Name not found")
+            Clear()
+            VAll(records)
+
+        except ValueError as err:  # if name doesn't exists
+            messagebox.showinfo("Delete", err)  # shows message box
             e1.focus()  # put the mouse in the name entry
 
 
@@ -323,22 +333,20 @@ def Frst():
         cr.execute(
             "SELECT * FROM report ORDER BY id_inc limit 1 "
         )  # query to select 1 record oredered bi id
-        for rec in cr:
-            for j in range(len(rec)):
-                v1.set(rec[1])  # sets name in the name entry
-                v2.set(rec[2])  # sets weight in the weight entry
-                v3.set(rec[3])  # sets height in the height entry
-                e4.set_date(datetime.strptime(rec[4], "%d/%m/%y"))
-                btP["state"] = "disabled"  # if no more records disable the button
-                btN[
-                    "state"
-                ] = "normal"  # normal button will be stated if there is records
-                Indextabl = 1
-                ctr = str(Indextabl) + "/" + str(len(tbl) - 1)  # for pagination
-                lb20.config(text=ctr)
+        rec = cr.fetchone()
+        assert rec, ValueError("No records found")
+        v1.set(rec[1])  # sets name in the name entry
+        v2.set(rec[2])  # sets weight in the weight entry
+        v3.set(rec[3])  # sets height in the height entry
+        e4.set_date(datetime.strptime(rec[4], "%d/%m/%Y"))
+        btP["state"] = "disabled"  # if no prev records disable the button
+        btN["state"] = "normal"  # normal button will be stated if there is records
+        Indextabl = 1
+        ctr = str(Indextabl) + "/" + str(len(tbl) - 1)  # for pagination
+        lb20.config(text=ctr)
         Calcul()  # calculates the current data on the height and weight fields
-    except:
-        messagebox.showinfo("First", " No records was found ")  # shows messagebox
+    except ValueError as err:
+        messagebox.showerror("First", err)  # shows messagebox
 
 
 # prints last record place by place
@@ -374,7 +382,7 @@ def Prntdata(r):
     v2.set(r[2])  # sets data to weight entry
     v3.set(r[3])  # sets data to height entry
     e4.set_date(
-        datetime.strptime(r[4], "%Y-%m-%d %H:%M:%S")
+        datetime.strptime(r[4], "%d/%m/%Y")
     )  # sets date to date time entry
     Calcul()  # calculates the current height and weight
     print(Indextabl)  # prints number of record in the table
@@ -461,6 +469,8 @@ def delete_selected():
     cr.execute("delete from report where id_inc=%s" % id)
     cn.commit()
     ls1.delete(ANCHOR)
+    messagebox.showinfo("Delete", "One Record Removed")  # shows message box
+    return 
 
 
 # view any record selected in the view all window list
