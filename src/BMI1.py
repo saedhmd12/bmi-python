@@ -3,7 +3,6 @@ from tkinter import messagebox
 from tkinter import ttk
 from datetime import *
 import webbrowser
-
 from tkcalendar import *
 import sqlite3
 
@@ -628,18 +627,18 @@ win.bind("<Control-r>", Calcul)  # for calculating height and weight
 win.bind("<Control-q>", Clear)  # reseting all fields
 s = ttk.Style()
 menubar = Menu(win)
-image = PhotoImage(file="assets/exit.png")  # exit png
-image1 = PhotoImage(file="assets/about.png")  # about png
-image2 = PhotoImage(file="assets/theme.png")  # themes png
-image3 = PhotoImage(file="assets/save.png")  # save png
-image4 = PhotoImage(file="assets/delete.png")  # delete png
-image5 = PhotoImage(file="assets/improve.png")  # improve png
-image6 = PhotoImage(file="assets/viewall.png")  # view all png
-image7 = PhotoImage(file="assets/viewone.png")  # view one png
-image8 = PhotoImage(file="assets/update.png")  # update png
-image9 = PhotoImage(file="assets/calculate.png")  # calculate png
-imag10 = PhotoImage(file="assets/color.png")  # colors png
-image10 = PhotoImage(file="assets/clear.png")  # clear png
+image = PhotoImage(file="../assets/exit.png")  # exit png
+image1 = PhotoImage(file="../assets/about.png")  # about png
+image2 = PhotoImage(file="../assets/theme.png")  # themes png
+image3 = PhotoImage(file="../assets/save.png")  # save png
+image4 = PhotoImage(file="../assets/delete.png")  # delete png
+image5 = PhotoImage(file="../assets/improve.png")  # improve png
+image6 = PhotoImage(file="../assets/viewall.png")  # view all png
+image7 = PhotoImage(file="../assets/viewone.png")  # view one png
+image8 = PhotoImage(file="../assets/update.png")  # update png
+image9 = PhotoImage(file="../assets/calculate.png")  # calculate png
+imag10 = PhotoImage(file="../assets/color.png")  # colors png
+image10 = PhotoImage(file="../assets/clear.png")  # clear png
 # menu bar commands and cascades
 filemenu = Menu(menubar, tearoff=0)
 menubar.add_cascade(label="File", menu=filemenu)
