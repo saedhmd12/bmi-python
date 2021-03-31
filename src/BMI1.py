@@ -8,7 +8,10 @@ from tkcalendar import *
 import sqlite3
 
 # create connection to BMI database
-cn = sqlite3.connect("../bmil.db")
+try:
+    cn = sqlite3.connect("../bmil.db")
+except:
+    cn = sqlite3.connect("bmil.db")
 cr = cn.cursor()
 # if there is no database here we created it
 
@@ -27,8 +30,6 @@ try:
 except:
     print("Table Already Exists")
 
-    Indextabl = 1
-
 
 sqs = "SELECT * FROM report order by id_inc"  # query to select (all(*)) from db table ordered by id
 cr.execute(sqs)  # executes the sqs to run the query
@@ -38,12 +39,12 @@ tbl = cr.fetchall()  # fetchall is a query result set and returns a list of tupl
 def table():
     cr.execute("select * from report")
     return cr.fetchall()
-
-
 if len(table()) == 0:
     ID = 0
+    Indextabl = 0
 else:
     ID = table()[-1][0] + 1
+    Indextabl = 1
 
 # def exit for window protocol and for exit menu
 def Exit():
@@ -623,18 +624,34 @@ win.bind("<Control-r>", Calcul)  # for calculating height and weight
 win.bind("<Control-q>", Clear)  # reseting all fields
 s = ttk.Style()
 menubar = Menu(win)
-image = PhotoImage(file="../assets/exit.png")  # exit png
-image1 = PhotoImage(file="../assets/about.png")  # about png
-image2 = PhotoImage(file="../assets/theme.png")  # themes png
-image3 = PhotoImage(file="../assets/save.png")  # save png
-image4 = PhotoImage(file="../assets/delete.png")  # delete png
-image5 = PhotoImage(file="../assets/improve.png")  # improve png
-image6 = PhotoImage(file="../assets/viewall.png")  # view all png
-image7 = PhotoImage(file="../assets/viewone.png")  # view one png
-image8 = PhotoImage(file="../assets/update.png")  # update png
-image9 = PhotoImage(file="../assets/calculate.png")  # calculate png
-imag10 = PhotoImage(file="../assets/color.png")  # colors png
-image10 = PhotoImage(file="../assets/clear.png")  # clear png
+
+try:
+    image = PhotoImage(file="../assets/exit.png")  # exit png
+    image1 = PhotoImage(file="../assets/about.png")  # about png
+    image2 = PhotoImage(file="../assets/theme.png")  # themes png
+    image3 = PhotoImage(file="../assets/save.png")  # save png
+    image4 = PhotoImage(file="../assets/delete.png")  # delete png
+    image5 = PhotoImage(file="../assets/improve.png")  # improve png
+    image6 = PhotoImage(file="../assets/viewall.png")  # view all png
+    image7 = PhotoImage(file="../assets/viewone.png")  # view one png
+    image8 = PhotoImage(file="../assets/update.png")  # update png
+    image9 = PhotoImage(file="../assets/calculate.png")  # calculate png
+    imag10 = PhotoImage(file="../assets/color.png")  # colors png
+    image10 = PhotoImage(file="../assets/clear.png")  # clear png
+except:
+    image = PhotoImage(file="assets/exit.png")  # exit png
+    image1 = PhotoImage(file="assets/about.png")  # about png
+    image2 = PhotoImage(file="assets/theme.png")  # themes png
+    image3 = PhotoImage(file="assets/save.png")  # save png
+    image4 = PhotoImage(file="assets/delete.png")  # delete png
+    image5 = PhotoImage(file="assets/improve.png")  # improve png
+    image6 = PhotoImage(file="assets/viewall.png")  # view all png
+    image7 = PhotoImage(file="assets/viewone.png")  # view one png
+    image8 = PhotoImage(file="assets/update.png")  # update png
+    image9 = PhotoImage(file="assets/calculate.png")  # calculate png
+    imag10 = PhotoImage(file="assets/color.png")  # colors png
+    image10 = PhotoImage(file="assets/clear.png")  # clear png
+
 # menu bar commands and cascades
 filemenu = Menu(menubar, tearoff=0)
 menubar.add_cascade(label="File", menu=filemenu)
@@ -756,7 +773,7 @@ lb15 = Label(fr1, fg="lightgray", text="You Are Obese")  # obese category label
 lb16 = Label(win, text="Healthy ? ")  # healthy label
 lb17 = Label(win, fg="lightgray", text="Yes")  # yes label
 lb18 = Label(win, fg="lightgray", text="No")  # no label
-ctr = str(Indextabl) + "/" + str(len(tbl) - 1)  # pagination
+ctr = str(Indextabl) + "/" + str(len(tbl))  # pagination
 lb20 = Label(
     win, text=ctr, bg="white", width=4, justify="center"
 )  # label for pagination
