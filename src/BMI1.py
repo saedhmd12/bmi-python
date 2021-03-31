@@ -3,11 +3,12 @@ from tkinter import messagebox
 from tkinter import ttk
 from datetime import *
 import webbrowser
+
 from tkcalendar import *
 import sqlite3
 
 # create connection to BMI database
-cn = sqlite3.connect("bmil.db")
+cn = sqlite3.connect("../bmil.db")
 cr = cn.cursor()
 # if there is no database here we created it
 
@@ -304,7 +305,7 @@ def VOne(a=""):
                 v2.set(row[2])  # sets height record in the height entry
                 v3.set(row[3])  # sets weight record in the weight entry
                 e4.set_date(
-                    datetime.strptime(row[4], "%d/%m%Y")
+                    datetime.strptime(row[4], "%d/%m/%Y")
                 )  # sets date record in the date entry
         Calcul()  # calculates the current data entered
 
@@ -371,9 +372,7 @@ def Lst():
                     "state"
                 ] = "normal"  # normal button will be stated if there is records
                 Indextabl = len(tbl)
-                ctr = (
-                    str(Indextabl) + "/" + str(len(tbl))
-                )  # for counting (pagination)
+                ctr = str(Indextabl) + "/" + str(len(tbl))  # for counting (pagination)
                 lb20.config(text=ctr)
         Calcul()  # calculates the current data on the height and weight fields
     except:
@@ -385,9 +384,7 @@ def Prntdata(r):
     v1.set(r[1])  # sets data to name entry
     v2.set(r[2])  # sets data to weight entry
     v3.set(r[3])  # sets data to height entry
-    e4.set_date(
-        datetime.strptime(r[4], "%d/%m/%Y")
-    )  # sets date to date time entry
+    e4.set_date(datetime.strptime(r[4], "%d/%m/%Y"))  # sets date to date time entry
     Calcul()  # calculates the current height and weight
     print(Indextabl)  # prints number of record in the table
 
@@ -426,7 +423,7 @@ def Prvs():
         btP["state"] = "disabled"  # the no more data set button disabled
     if btN["state"] == "disabled":
         btN["state"] = "normal"
-    Prntdata(tbl[Indextabl-1])
+    Prntdata(tbl[Indextabl - 1])
     ctr = str(Indextabl) + "/" + str(len(tbl))
     lb20.config(text=ctr)
 
@@ -474,7 +471,6 @@ def delete_selected():
     cn.commit()
     ls1.delete(ANCHOR)
     messagebox.showinfo("Delete", "One Record Removed")  # shows message box
-    return 
 
 
 # view any record selected in the view all window list
